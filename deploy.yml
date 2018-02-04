@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+     remote_warfile: /tmp/helloworld.war
+     remote_webapps: /opt/tomcat/webapps/
+
+  tasks:
+    - name: tomcat stop
+      service: name=tomcat state=stopped
+    - name: Backup the existing artifacts to tmp directory
+      copy: dest=/opt/helloworld.war  src=/opt/tomcat/webapps/helloworld.war remote_src=yes
+
+
+
+    - name: copy war file
+      command: cp {{remote_warfile}} {{remote_webapps}}
+      notify: start tomcat
+
+  handlers:
+    - name: start tomcat
+      service: name=tomcat state=started
